@@ -1,0 +1,63 @@
+services:
+  postgres:
+    container_name: database
+    image: postgres:latest
+    volumes: 
+      - ./db:/docker-entrypoint-initdb.d
+    environment:
+      - POSTGRES_PASSWORD=idkthepassword
+      - PGUSER=postgres
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "db_prod"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 80s
+
+  api:
+    container_name: api
+    build: ./api
+    ports:
+      - 8001:8001
+    networks:
+      - backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    container_name: client
+    image: node:latest
+    user: node
+    working_dir: /home/node/app
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./client:/home/node/app
+    ports:
+      - 3000:3000
+    command: "npm run start"
+    networks:
+      - backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  rabbit:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - 15672:15672
+      - 5672:5672
+    networks:
+      - backend
+  scrapper:
+    image: python
+    build: ./cron
+    networks:
+      - backend
+
+networks:
+  backend: {}
