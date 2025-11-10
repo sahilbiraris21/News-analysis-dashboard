@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Routes for easy access</title>
+    </head>
+    <body>
+        <ul>
+            {% for route in routes %}
+                <li><a href="{{ route }}">{{ route }}</a></li>
+            {% endfor %}
+        </ul>
+    </body>
+</html>

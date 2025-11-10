@@ -1,0 +1,1 @@
+npm i; node auth.js; node token.js
